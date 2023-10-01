@@ -18,8 +18,25 @@ A basic command-line XOR cipher tool.
 $ echo Plaintext > plaintxt
 $ cat plaintxt | xor -k cipherkey > ciphertxt
 $ xxd ciphertxt
-00000000: 2005 1509 1706 0e1d 0d69                  ........i
+00000000: 3305 1101 0b06 0e1d 0d69                 3........i
 $ cat ciphertxt | xor -k cipherkey
+Plaintext
+
+# base64 key
+$ echo -n cipherkey | base64
+Y2lwaGVya2V5
+$ cat ciphertxt | xor -bk Y2lwaGVya2V5
+Plaintext
+
+# hex key
+$ echo -n cipherkey | xxd -p
+6369706865726b6579
+$ cat ciphertxt | xor -hk 6369706865726b6579
+Plaintext
+
+# key file
+$ echo -n cipherkey > cipher.key
+$ cat ciphertxt | xor -fk cipher.key
 Plaintext
 ```
 
