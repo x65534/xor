@@ -4,18 +4,58 @@ A basic command-line XOR cipher tool.
 
 # Usage
 
-`xor [-h|-b] key`
+`xor [options] -k key [files...]`
 
-- `-h` specifies the key is in hex format.
-- `-b` specifies the key is base64 encoded.
+- `-k` `--key` specifies the input key / key file.
+- Only one of the following key formats can be specified:
+  - `-h` `--hex` specifies the key is in hex format.
+  - `-b` `--base64` specifies the key is base64 encoded.
+  - `-f` `--file` specifies the key is a file.
+- `-d` `--decrypt` decrypts input files with a `.xor` extension. Has no effect when processing from standard input.
 
+## Process from standard input
 ```sh
-cat encrypted_file | xor cipherkey
+$ echo Plaintext > plaintxt
+$ cat plaintxt | xor -k cipherkey > ciphertxt
+$ xxd ciphertxt
+00000000: 2005 1509 1706 0e1d 0d69                  ........i
+$ cat ciphertxt | xor -k cipherkey
+Plaintext
+```
+
+## Process files
+Encrypted files will be saved with a `.xor` suffix.\
+When encrypting, files with a `.xor` suffix will be ignored.\
+Likewise, files without a `.xor` suffix will be ignored when decrypting.
+```sh
+$ for x in {a..c}; do echo "Plaintext $x" > "$x.txt"; done
+$ ls
+a.txt  b.txt  c.txt
+$ xor -k cipherkey *.txt
+a.txt: a.txt.xor
+b.txt: b.txt.xor
+c.txt: c.txt.xor
+$ rm *.txt
+$ ls
+a.txt.xor  b.txt.xor  c.txt.xor
+$ for f in *.xor; do xxd "$f"; done
+00000000: 3305 1101 0b06 0e1d 0d43 087a            3........C.z
+00000000: 3305 1101 0b06 0e1d 0d43 0b7a            3........C.z
+00000000: 3305 1101 0b06 0e1d 0d43 0a7a            3........C.z
+$ xor -d -k cipherkey *.xor
+a.txt.xor: a.txt
+b.txt.xor: b.txt
+c.txt.xor: c.txt
+$ rm *.xor
+$ cat *.txt
+Plaintext a
+Plaintext b
+Plaintext c
 ```
 
 # Installation
 
+Requires Go 1.21.1.
 ```sh
-git clone https://github.com/uid65534/xor && cd xor && go install
+go install github.com/x65534/xor@latest
 ```
-
